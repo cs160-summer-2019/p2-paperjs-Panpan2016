@@ -59,13 +59,28 @@
 			// you may also add code outside of the function (e.g., global variables)
 			function myGradientInteraction(){
 				var tool = new paper.Tool();
-
+        var point1 = new paper.Point(225, 275);
+        var point2 = new paper.Point(500, 400);
+        var newRectangle = new paper.Rectangle(point1, point2);
+        var rec = new paper.Path.Rectangle(newRectangle);
+        rec.fillColor = 'red';
+        
+        var downPath;
 				tool.onMouseDown = function (event) {
-
+          downPath = event.point;
 				}
 
 				tool.onMouseUp = function (event) {
-					
+					var upPath = event.point;
+          var firstColor = cp.history[cp.history.length-2];
+          var secondColor = cp.history[cp.history.length-1];
+          rec.fillColor = {
+            gradient: {
+              stops: [firstColor, secondColor]
+            },
+            origin: downPath,
+            destination: upPath
+          };
 				}
 			}
 
@@ -73,7 +88,7 @@
 			// you may replace everything
 			function myCustomInteraction() {
 				var tool = new paper.Tool();
-
+        
 				tool.onMouseDown = function (event) {
 				    var hit = mandala.item.hitTest(event.point, { tolerance: 10, fill: true });
 				    if (hit) {
