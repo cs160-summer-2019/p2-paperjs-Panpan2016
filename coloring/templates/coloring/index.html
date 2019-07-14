@@ -5,41 +5,460 @@
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
   	<title>P3 Coloring</title>
-
+  
+  <link href="//netdna.bootstrapcdn.com/bootstrap/3.0.2/css/bootstrap.min.css" rel="stylesheet">
+  
 	<script type="text/javascript" src="{% static 'coloring/vendors/jquery/jquery-3.3.1.min.js' %}"></script>
 	<script type="text/javascript" src="{% static 'coloring/vendors/paper/paper-full.min.js' %}"></script>
-
+  <script src="https://hammerjs.github.io/dist/hammer.js"></script>
+  
 	<style type="text/css">
+       
+    /* #topBox {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 135px;
+      
+      display: flex;
+      flex-direction: row;
+    }*/
+    
+    #topItems {
+      display: fixed;
+      flex-direction: row;
+      padding: 10px;
+    }
+    
 		#color-palette {
-			width: 300px;
+			width: 700px;
+      height: auto;
 			background-color: #f1f1f1;
 			display: flex;
 			flex-wrap: wrap;
-			position: absolute;
-			top: 0;
 		}
+    
+    #palette-box {
+      position: absolute;
+      top: 800px;
+      left:50px;
+    }
 
 		.swatch {
-			width: 24px;
-			height: 24px;
+			width: 50px;
+			height: 50px;
 			-moz-border-radius: 12px;
 			-webkit-border-radius: 12px;
 			border-radius: 12px;
-			margin: 3px;
+			margin: 10px;
 		}
 
 		#myCanvas {
-			padding-left: 0;
-		    padding-right: 0;
-		    margin-left: auto;
-		    margin-right: auto;
-		    display: block;
+      margin-top: 50px;
+      margin-left: 100px;
+		  display: block;
 		}
+    
+    
+    #palette_image {
+      width: 120px;
+      height: 120px;
+      /*position: absolute;*/
+      top: 57px;
+      left: 75px;
+    }
+    
+    #undo {
+      width: 80px;
+      height: 80px;
+    }
+
+    /*#bottomBox {
+      position: fixed;
+      bottom: 0;
+      left: 0; 
+      width: 100%;
+      height: 250px;
+      background-color: #f1f1f1;
+      display: flex;
+      flex-direction: row;
+    }*/
+    
+    #circles_Gradient{
+      position: relative;
+      top: 7px;
+      right: -100px;
+      width: 50px;
+      height: 50px;
+    }
+    
+    
+    .circle {
+      margin-left: 15px;
+      width: 50px;
+      height: 50px;
+      border: black;
+}
+   
+    #lastFive {
+      display: flex; 
+      flex-direction: row; 
+    }
+    
+    #gradient_box {
+      width: 550px;
+      height: 100px;
+      margin-left: 220px;
+      margin-bottom: 50px;
+    }
+    
+    #currentColor {
+      width: 80px;
+      height: 80px;
+      position: absolute;
+      right: 40px;
+    }
+    
+    .addIcon {
+      width: 30px;
+      height: 30px;
+      margin-right: 20px;
+      padding-right: 10px;
+    }
+    
 	</style>
 
 	<script type="text/javascript" canvas="canvas">
 		window.onload = function() {
 			var canvas = document.getElementById('myCanvas');
+      
+      //PANPAN'S CODE
+      
+      //create circles
+      var c1 = document.getElementById("colorOne");
+      var c2 = document.getElementById("colorTwo");
+      var c3 = document.getElementById("colorThree");
+      var c4 = document.getElementById("colorFour");
+      var c5 = document.getElementById("colorFive");
+      
+      var usedColors = {
+				history: [], // black selected by defaul
+        $container: $('#lastFive')
+			}
+      
+      fillLastFive();
+      
+      function fillLastFive() {
+        var ctx1 = c1.getContext("2d");
+        ctx1.beginPath();
+        ctx1.arc(50, 50, 50, 0, 2 * Math.PI);
+        ctx1.stroke();
+        
+        var ctx2 = c2.getContext("2d");
+        ctx2.beginPath();
+        ctx2.arc(50, 50, 50, 0, 2 * Math.PI);
+        ctx2.stroke();
+        
+        var ctx3 = c3.getContext("2d");
+        ctx3.beginPath();
+        ctx3.arc(50, 50, 50, 0, 2 * Math.PI);
+        ctx3.stroke();
+        
+        var ctx4 = c4.getContext("2d");
+        ctx4.beginPath();
+        ctx4.arc(50, 50, 50, 0, 2 * Math.PI);
+        ctx4.stroke();
+        
+        var ctx5 = c5.getContext("2d");
+        ctx5.beginPath();
+        ctx5.arc(50, 50, 50, 0, 2 * Math.PI);
+        ctx5.stroke();
+        
+        //var lastColor =
+        
+        if (usedColors.history.length == 1) {
+          ctx1.fillStyle = usedColors.history[usedColors.history.length - 1];
+          ctx1.fill();
+        } else if (usedColors.history.length == 2) {
+          ctx2.fillStyle = usedColors.history[usedColors.history.length - 1];
+          ctx2.fill();
+        } else if (usedColors.history.length == 3) {
+          ctx3.fillStyle = usedColors.history[usedColors.history.length - 1];
+          ctx3.fill();
+        } else if (usedColors.history.length == 4) {
+          ctx4.fillStyle = usedColors.history[usedColors.history.length - 1];
+          ctx4.fill();
+        } else if (usedColors.history.length >= 5) {
+          ctx1.fillStyle = usedColors.history[usedColors.history.length - 5];
+          ctx1.fill();
+          ctx2.fillStyle = usedColors.history[usedColors.history.length - 4];
+          ctx2.fill();
+          ctx3.fillStyle = usedColors.history[usedColors.history.length - 3];
+          ctx3.fill();
+          ctx4.fillStyle = usedColors.history[usedColors.history.length - 2];
+          ctx4.fill();
+          ctx5.fillStyle = usedColors.history[usedColors.history.length - 1];
+          ctx5.fill();
+        } else {
+          ctx1.fillStyle = "white";
+          ctx1.fill();
+          ctx2.fillStyle = "white";
+          ctx2.fill();
+          ctx3.fillStyle = "white";
+          ctx3.fill();
+          ctx4.fillStyle = "white";
+          ctx4.fill();
+          ctx5.fillStyle = "white";
+          ctx5.fill();
+        }
+        
+      }
+      
+      //Click button for old color 
+      
+      var me1 = new Hammer(c1);
+	    me1.on("tap", function(ev1) {
+       if (usedColors.history.length <  5) {
+         cp.history.push(usedColors.history[0]);
+         updateSelectedColor(usedColors.history[0]);
+       } else {
+         cp.history.push(usedColors.history[usedColors.history.length-5]);
+         updateSelectedColor(usedColors.history[usedColors.history.length-5]);
+       }
+	    });
+      
+      var me2 = new Hammer(c2);
+	    me2.on("tap", function(ev2) {
+       if (usedColors.history.length <  5) {
+         cp.history.push(usedColors.history[1]);
+         updateSelectedColor(usedColors.history[1]);
+       } else {
+         cp.history.push(usedColors.history[usedColors.history.length-4]);
+         updateSelectedColor(usedColors.history[usedColors.history.length-4]);
+       }
+	    });
+
+      var me3 = new Hammer(c3);
+	    me3.on("tap", function(ev3) {
+       if (usedColors.history.length <  5) {
+         cp.history.push(usedColors.history[2]);
+         updateSelectedColor(usedColors.history[2]);
+       } else {
+         cp.history.push(usedColors.history[usedColors.history.length-3]);
+         updateSelectedColor(usedColors.history[usedColors.history.length-3]);
+       }
+	    });
+      
+      var me4 = new Hammer(c4);
+	    me4.on("tap", function(ev4) {
+       if (usedColors.history.length <  5) {
+         cp.history.push(usedColors.history[3]);
+         updateSelectedColor(usedColors.history[3]);
+       } else {
+         cp.history.push(usedColors.history[usedColors.history.length-2]);
+         updateSelectedColor(usedColors.history[usedColors.history.length-2]);
+       }
+	    });
+      
+      var me5 = new Hammer(c5);
+	    me5.on("tap", function(ev5) {
+       if (usedColors.history.length <  5) {
+         cp.history.push(usedColors.history[4]);
+         updateSelectedColor(usedColors.history[4]);
+       } else {
+         cp.history.push(usedColors.history[usedColors.history.length-1]);
+         updateSelectedColor(usedColors.history[usedColors.history.length-1]);
+       }
+	    });
+      
+      //adding new color
+      /*$container: $('#colorOne').click( function() {
+        if (usedColors.history.length <  5) {
+         cp.options.push(usedColors.history[0]);
+       } else {
+         cp.options.push(usedColors.history[usedColors.history.length-5];
+       }
+     });*/
+      var a1 = document.getElementById("addOne");
+      var a2 = document.getElementById("addTwo");
+      var a3 = document.getElementById("addThree");
+      var a4 = document.getElementById("addFour");
+      var a5 = document.getElementById("addFive");
+      
+      var add1 = new Hammer(a1);
+	    add1.on("tap", function(ev1) {
+       var color = [];
+       if (usedColors.history.length <  5) {
+         if (!cp.options.includes(usedColors.history[0])) {
+           color.push(usedColors.history[0]);
+           cp.options.push(usedColors.history[0]);
+           createColorPalette(color);
+         } 
+       } else {
+         if (!cp.options.includes(usedColors.history[usedColors.history.length-5])) {
+           color.push(usedColors.history[usedColors.history.length-5]);
+           cp.options.push(usedColors.history[usedColors.history.length-5]);
+           createColorPalette(color);
+         } 
+       }
+	    });
+      
+      var add2 = new Hammer(a2);
+	    add2.on("tap", function(ev2) {
+       var color = [];
+       if (usedColors.history.length <  5) {
+         if (!cp.options.includes(usedColors.history[1])) {
+           color.push(usedColors.history[1]);
+           cp.options.push(usedColors.history[1]);
+           createColorPalette(color);
+         } 
+       } else {
+         if (!cp.options.includes(usedColors.history[usedColors.history.length-4])) {
+           color.push(usedColors.history[usedColors.history.length-4]);
+           cp.options.push(usedColors.history[usedColors.history.length-4]);
+           createColorPalette(color);
+         } 
+       }
+	    });
+      
+      var add3 = new Hammer(a3);
+	    add3.on("tap", function(ev3) {
+       var color = [];
+       if (usedColors.history.length <  5) {
+         if (!cp.options.includes(usedColors.history[2])) {
+           color.push(usedColors.history[2]);
+           cp.options.push(usedColors.history[2]);
+           createColorPalette(color);
+         } 
+       } else {
+         if (!cp.options.includes(usedColors.history[usedColors.history.length-3])) {
+           color.push(usedColors.history[usedColors.history.length-3]);
+           cp.options.push(usedColors.history[usedColors.history.length-3]);
+           createColorPalette(color);
+         } 
+       }
+	    });
+      
+      var add4 = new Hammer(a4);
+	    add4.on("tap", function(ev4) {
+       var color = [];
+       if (usedColors.history.length <  5) {
+         if (!cp.options.includes(usedColors.history[3])) {
+           color.push(usedColors.history[3]);
+           cp.options.push(usedColors.history[3]);
+           createColorPalette(color);
+         } 
+       } else {
+         if (!cp.options.includes(usedColors.history[usedColors.history.length-2])) {
+           color.push(usedColors.history[usedColors.history.length-2]);
+           cp.options.push(usedColors.history[usedColors.history.length-2]);
+           createColorPalette(color);
+         } 
+       }
+	    });
+      
+      var add5 = new Hammer(a5);
+	    add5.on("tap", function(ev5) {
+       var color = [];
+       if (usedColors.history.length <  5) {
+         if (!cp.options.includes(usedColors.history[4])) {
+           color.push(usedColors.history[4]);
+           cp.options.push(usedColors.history[4]);
+           createColorPalette(color);
+         } 
+       } else {
+         if (!cp.options.includes(usedColors.history[usedColors.history.length-1])) {
+           color.push(usedColors.history[usedColors.history.length-1]);
+           cp.options.push(usedColors.history[usedColors.history.length-1]);
+           createColorPalette(color);
+         } 
+       }
+	    });
+      
+      //end of click button code
+      
+      //LEONOR'S CODE
+      //creates circle for current color 
+      var c = document.getElementById("currentColor");
+      updateSelectedColor("red");
+      
+      //updates circle color on top bar 
+      function updateSelectedColor(newColor){
+        var ctx = c.getContext("2d");
+        ctx.beginPath();
+        ctx.arc(50, 50, 50, 0, 2 * Math.PI);
+        ctx.fillStyle = newColor;
+        ctx.fill();
+        ctx.strokeStyle = "solid black";
+        ctx.stroke();
+      }      
+      
+      //creates gradient box 
+      var gradient = document.getElementById('gradient_box');
+      var ctx = gradient.getContext("2d");
+      updateGradient("white", "red"); //
+      
+     //This function updates the gradient box from white to newColor  
+      function updateGradient(newColor1, newColor2) {
+        var grd = ctx.createLinearGradient(0, 0, 600, 0);
+        grd.addColorStop(0, newColor1);
+        grd.addColorStop(1, newColor2);
+        ctx.fillStyle = grd;
+        ctx.fillRect(0, 0, 650, 150);
+      }
+      
+    //following 4 functions from: https://ourcodeworld.com/articles/read/185/how-to-get-the-pixel-color-from-a-canvas-on-click-or-mouse-event-with-javascript   
+    function getElementPosition(obj) {
+      var curleft = 0, curtop = 0;
+      if (obj.offsetParent) {
+        do {
+            curleft += obj.offsetLeft;
+            curtop += obj.offsetTop;
+        } while (obj = obj.offsetParent);
+        return { x: curleft, y: curtop };
+      }
+      return undefined;
+    }
+      
+     function getEventLocation(element,event){
+      // Relies on the getElementPosition function.
+      var pos = getElementPosition(element);
+      return {
+    	  x: (event.pageX - pos.x),
+        y: (event.pageY - pos.y)
+      };
+    }
+      
+    gradient.addEventListener("click",function(event){
+      // Get the coordinates of the click
+      var eventLocation = getEventLocation(this,event);
+      // Get the data of the pixel according to the location generate by the getEventLocation function
+      var context = this.getContext('2d');
+      var pixelData = context.getImageData(eventLocation.x, eventLocation.y, 1, 1).data; 
+
+      // If transparency on the pixel , array = [0,0,0,0]
+      if((pixelData[0] == 0) && (pixelData[1] == 0) && (pixelData[2] == 0) && (pixelData[3] == 0)){
+        // Do something if the pixel is transparent
+      }
+
+      // Convert it to HEX if you want using the rgbToHex method.
+      var hex = "#" + ("000000" + rgbToHex(pixelData[0], pixelData[1], pixelData[2])).slice(-6);
+      cp.history.push(hex);
+      updateSelectedColor(hex);
+      
+      
+},false);
+      
+    function rgbToHex(r, g, b) {
+      if (r > 255 || g > 255 || b > 255)
+        throw "Invalid color component";
+      return ((r << 16) | (g << 8) | b).toString(16);
+    }
+      
+      
+      //END OF LEONORS CODE
+
 
 			// coloring page
 			var mandala = {
@@ -50,7 +469,7 @@
 
 			// color palette
 			var cp = {
-				history: ["#000000"], // black selected by default
+				history: ["red"], // black selected by default
 				options: [],
 				$container: $('#color-palette')
 			}
@@ -59,44 +478,86 @@
 			// you may also add code outside of the function (e.g., global variables)
 			function myGradientInteraction(){
 				var tool = new paper.Tool();
-        var point1 = new paper.Point(225, 275);
-        var point2 = new paper.Point(500, 400);
-        var newRectangle = new paper.Rectangle(point1, point2);
-        var rec = new paper.Path.Rectangle(newRectangle);
-        rec.fillColor = 'red';
         
-        var downPath;
-				tool.onMouseDown = function (event) {
-          downPath = event.point;
-				}
+        let path = new paper.Path();
 
+        // Add three points to the path
+        path.add(new paper.Point(120, 270));
+        path.add(new paper.Point(120, 120));
+        path.add(new paper.Point(420, 120));
+        path.add(new paper.Point(420, 270)); 
+
+        // Close the path
+        path.closed = true;
+
+        // Give the path a color and fill color
+        path.strokeColor = 'black';
+        path.strokeWidth = 5;
+        path.fillColor = 'red';
+
+        // Draw the path now
+        paper.view.draw();
+        var start;
+        var end;
+        
+				tool.onMouseDown = function (event) {
+          start = event.point;
+				}  
 				tool.onMouseUp = function (event) {
-					var upPath = event.point;
-          var firstColor = cp.history[cp.history.length-2];
-          var secondColor = cp.history[cp.history.length-1];
-          rec.fillColor = {
-            gradient: {
-              stops: [firstColor, secondColor]
-            },
-            origin: downPath,
-            destination: upPath
-          };
-				}
-			}
+         end = event.point;
+         path.fillColor = {gradient: {stops: [cp.history[cp.history.length-1], 
+                                              cp.history[cp.history.length-2]]}, 
+                           origin: start, destination: end};
+				}  
+      }
 
 			// your custom interaction goes here!
 			// you may replace everything
 			function myCustomInteraction() {
 				var tool = new paper.Tool();
         
+        //color being used is selected
 				tool.onMouseDown = function (event) {
 				    var hit = mandala.item.hitTest(event.point, { tolerance: 10, fill: true });
 				    if (hit) {
 				        hit.item.fillColor = cp.history[cp.history.length - 1];
+              
+                if (usedColors.history.length < 5) {
+                  if (!usedColors.history.includes(cp.history[cp.history.length - 1])) {
+                    usedColors.history.push(cp.history[cp.history.length -1]);
+                  }
+                } else {
+                  var lastFiveColor = usedColors.history.slice(usedColors.history.length-5, usedColors.history.length);
+                  if (!lastFiveColor.includes(cp.history[cp.history.length - 1])) {
+                    usedColors.history.push(cp.history[cp.history.length -1]);
+                  }
+                }
+                
+                fillLastFive();
 				    }
 				}
 			}
-
+      
+     //LEONOR'S CODE 
+     $container: $('#color-palette').hide(); 
+     var click = 0;
+     $container: $('#palette_image').click( function() {
+        click += 1;
+       controlPalette(click);
+     });
+      
+     function controlPalette(n) {
+       if ((click % 2) == 0){
+         $container: $('#color-palette').hide();
+       }
+       else {
+          $container: $('#color-palette').show();
+       }
+     }
+      
+      //END OF LEONOR'S CODE
+      
+      
 
 			// create a color palette with the given colors
 			function createColorPalette(colors){
@@ -108,6 +569,8 @@
 					$swatch.click(function(){
 						// add color to the color palette history
 					  	cp.history.push($(this).css("background-color"));
+              updateGradient(cp.history[cp.history.length - 2], cp.history[cp.history.length - 1]);
+              updateSelectedColor(cp.history[cp.history.length - 1]);
 					});
 					cp.$container.append($swatch);
 				}
@@ -156,8 +619,53 @@
 	</script>
 </head>
 <body>	
+  <div id="topBox" class="row">
+    <div id="topItems">
+      <!-- Undo, redo, and eraser go here -->
+      <div class="col-sm-8"></div>
+     <canvas id="currentColor" width="100px" height="100px" class="col-sm-4"></canvas>
+    </div>
+    </div>
+  </div>
+  
+  
+  
+  
+    <div class="row">
+      <canvas id="myCanvas" width="2244px" height="2184px" class="col-sm-12"></canvas>
+    </div>
+	
+  <div class="row" id="palette-box">
+    <div class="col-sm-12" id="color-palette"></div>
+  </div>
 
-	<canvas id="myCanvas" width="750px" height="750px"></canvas>
-	<div id="color-palette"></div>
+  
+  <!-- LEONOR'S CODE -->
+  <div id="bottomBox" class="row">
+    <img id="palette_image" src='/static/coloring/images/palette.png' alt="color palette" class="col-sm-2">
+    <!-- PANPAN'S COLOR'S BOX-->
+    <div id= "circles_Gradient">
+      <div id ="lastFive">
+        <canvas  class="circle" id="colorOne" width="100px" height="100px" class="col-sm-2"> </canvas>
+        <img id="addOne" src='/static/coloring/images/add.png' alt="add icon" class="addIcon"> 
+        <canvas  class="circle" id="colorTwo" width="100px" height="100px" class="col-sm-2"></canvas>
+        <img id="addTwo" src='/static/coloring/images/add.png' alt="add icon" class="addIcon"> 
+        <canvas  class="circle" id="colorThree" width="100px" height="100px" class="col-sm-2"></canvas>
+        <img id="addThree" src='/static/coloring/images/add.png' alt="add icon" class="addIcon"> 
+        <canvas  class="circle" id="colorFour" width="100px" height="100px" class="col-sm-2"></canvas>
+        <img id="addFour" src='/static/coloring/images/add.png' alt="add icon" class="addIcon"> 
+        <canvas  class="circle" id="colorFive" width="100px" height="100px" class="col-sm-2"></canvas>
+        <img id="addFive" src='/static/coloring/images/add.png' alt="add icon" class="addIcon"> 
+      </div>
+    
+    </div>
+  </div>
+  <div class="row">
+    <canvas id="gradient_box" class="col-sm-12"></canvas>
+  </div>
+  
+  <!-- END OF LEONOR'S CODE -->
+  
+</body>
 </body>
 </html>
